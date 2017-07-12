@@ -97,21 +97,17 @@
             }
 
             touchMoveDistance=event.clientY-touchStartPoint.y;
-
-            //console.log(touchMoveDistance);
+            if(touchMoveDistance > 0){
+                touchMoveDistance = Math.sqrt(touchMoveDistance)*10/mergeOption.down.damping;
+            }else if(touchMoveDistance < 0){
+                touchMoveDistance = -Math.sqrt(Math.abs(touchMoveDistance))*5/mergeOption.up.damping
+            }
 
             if(!requestAnimationFrameId){
                 setAnimationFrame();
             }
             //$pulldownRefreshContainer.style.transform='translate(0,'+touchMoveDistance+'px)';
 
-            if(touchMoveDistance>0){
-                //下拉
-                $pulldownRefreshPulldownCaption.style.display='block';
-            }else{
-                //上拉
-
-            }
 
             var iconRotate;
 
@@ -147,12 +143,12 @@
 
             if(touchMoveDistance>0){
                 //下拉
-                $pulldownRefreshContainer.style['-webkit-transform']='translate(0,'+Math.sqrt(touchMoveDistance)*10/mergeOption.down.damping+'px)';
-                $pulldownRefreshPullupCaption.style['-webkit-transform']='translate(0,'+Math.sqrt(touchMoveDistance)*10/mergeOption.down.damping+'px)';
+                $pulldownRefreshContainer.style['-webkit-transform']='translate(0,'+touchMoveDistance+'px)';
+                $pulldownRefreshPullupCaption.style['-webkit-transform']='translate(0,'+touchMoveDistance+'px)';
             }else{
                 //上拉
-                $pulldownRefreshContainer.style['-webkit-transform']='translate(0,-'+Math.sqrt(Math.abs(touchMoveDistance))*5/mergeOption.up.damping+'px)';
-                $pulldownRefreshPullupCaption.style['-webkit-transform']='translate(0,-'+Math.sqrt(Math.abs(touchMoveDistance))*5/mergeOption.up.damping+'px)';
+                $pulldownRefreshContainer.style['-webkit-transform']='translate(0,'+touchMoveDistance+'px)';
+                $pulldownRefreshPullupCaption.style['-webkit-transform']='translate(0,'+touchMoveDistance+'px)';
             }
 
             requestAnimationFrameId=window.requestAnimationFrame(setAnimationFrame);
@@ -160,23 +156,10 @@
 
         function touchEnd(e){
             console.log('touchend');
-
-            //reset
-            touchMoveDistance=$pulldownRefreshPulldownCaption.offsetHeight;
-            $pulldownRefreshContainer.style.transitionDuration="1s";
-            $pulldownRefreshContainer.style['-webkit-transform']='translate(0,'+touchMoveDistance+'px)';
-
-            $pulldownRefreshPulldownCaptionIconPulldown.style['-webkit-transform']='rotate(0deg)';
-
-            $pulldownRefreshPullupCaption.style.transitionDuration="1s";
-            $pulldownRefreshPullupCaption.style['-webkit-transform']='translate(0,'+touchMoveDistance+'px)';
-
-            window.cancelAnimationFrame(requestAnimationFrameId);
-            requestAnimationFrameId = null;
-
             //下拉
             if(triggerPullDown){
                 //改变pulldown caption 为正在刷新
+                touchMoveDistance=$pulldownRefreshPulldownCaptionText.offsetHeight;
                 $pulldownRefreshPulldownCaptionIconPulldown.style.display='none';
                 $pulldownRefreshPulldownCaptionIconSpinner.style.display='inline-block';
 
@@ -184,7 +167,7 @@
                 mergeOption.down && mergeOption.down.callback && mergeOption.down.callback();
                 triggerPullDown=false;
             }else{
-                $pulldownRefreshPulldownCaption.style.display='none';
+                touchMoveDistance=0;
             }
 
             //上拉
@@ -196,6 +179,20 @@
                 mergeOption.up && mergeOption.up.callback && mergeOption.up.callback();
                 triggerPullUp=false;
             }
+
+            //reset
+
+            $pulldownRefreshContainer.style.transitionDuration="1s";
+            $pulldownRefreshContainer.style['-webkit-transform']='translate(0,'+touchMoveDistance+'px)';
+
+            $pulldownRefreshPulldownCaptionIconPulldown.style['-webkit-transform']='rotate(0deg)';
+
+            $pulldownRefreshPullupCaption.style.transitionDuration="1s";
+            $pulldownRefreshPullupCaption.style['-webkit-transform']='translate(0,'+touchMoveDistance+'px)';
+
+            window.cancelAnimationFrame(requestAnimationFrameId);
+            requestAnimationFrameId = null;
+
         }
         function endPulldownToRefresh(){
             touchMoveDistance=0;
@@ -203,9 +200,9 @@
             $pulldownRefreshContainer.style['-webkit-transform']='translate(0,'+touchMoveDistance+'px)';
             $pulldownRefreshPullupCaption.style['-webkit-transform']='translate(0,'+touchMoveDistance+'px)';
 
-            setTimeout(function () {
-                $pulldownRefreshPulldownCaption.style.display='none';
-            },500);
+            // setTimeout(function () {
+            //     $pulldownRefreshPulldownCaption.style.display='none';
+            // },500);
         }
         function endPullupToRefresh(finished){
             if(finished){
